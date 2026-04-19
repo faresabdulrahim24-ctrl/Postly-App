@@ -1,0 +1,33 @@
+.custom-page-title {
+    color: #e2e8f0; 
+    font-weight: 800; 
+    letter-spacing: 0.5px;
+    text-transform: capitalize;
+}
+
+.custom-page-title span {
+    background: linear-gradient(45deg, #0d6efd, #00d4ff);
+    background-clip: text;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    text-shadow: 0px 4px 15px rgba(13, 110, 253, 0.3); 
+}
+
+.custom-back-btn {
+    background-color: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 50%;
+    width: 45px;
+    height: 45px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s ease;
+}
+
+.custom-back-btn:hover {
+    background-color: rgba(13, 110, 253, 0.15);
+    border-color: #0d6efd;
+    transform: translateX(-5px);
+    box-shadow: 0 0 15px rgba(13, 110, 253, 0.3);
+}
