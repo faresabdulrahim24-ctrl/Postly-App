@@ -1,5 +1,3 @@
-const { default: axios } = require("axios");
-
 const urlParams = new URLSearchParams(window.location.search);
 const postId = urlParams.get('postId');
 

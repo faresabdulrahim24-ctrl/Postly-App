@@ -96,7 +96,7 @@
         <div class="modal-dialog">
             <div class="modal-content custom-modal">
                 <div class="modal-header">
-                    <h1 class="modal-title fs-5" id="exampleModalLabel">Create A New Post</h1>
+                    <h1 class="modal-title fs-5" id="addPostModalTitle">Create A New Post</h1>
                     <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"
                         aria-label="Close"></button>
                 </div>
@@ -105,6 +105,7 @@
                         <div class="mb-3">
                             <label for="recipient-name" class="col-form-label">Post Header:</label>
                             <input type="text" class="form-control" id="post-header-input">
+                            <input type="hidden" id="post-id" value="">
                         </div>
                         <div class="mb-3">
                             <label for="message-text" class="col-form-label">Post Content:</label>
@@ -126,6 +127,43 @@
         </div>
     </div>
     <!-- //add post modal -->
+
+    <!-- edit post modal -->
+    <!-- <div class="modal fade" id="edit-post-modal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content custom-modal">
+                <div class="modal-header">
+                    <h1 class="modal-title fs-5" id="exampleModalLabel">Edit Post</h1>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"
+                        aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form>
+                        <div class="mb-3">
+                            <label for="recipient-name" class="col-form-label">Post Header:</label>
+                            <input type="text" class="form-control" id="edit-post-header-input">
+                        </div>
+                        <div class="mb-3">
+                            <label for="message-text" class="col-form-label">Post Content:</label>
+                            <textarea class="form-control custom-textarea" id="edit-post-content-input"></textarea>
+                        </div>
+                        <div class="mb-3">
+                            <label for="post-image-url" class="col-form-label">Image:</label>
+                            <input type="file" class="form-control" id="edit-post-image-input">
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline-secondary text-light"
+                        data-bs-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-outline-success" onclick="saveEditedPost()">Save
+                        Changes</button>
+                </div>
+            </div>
+        </div>
+    </div> -->
+    <!-- //edit post modal -->
+
     <!-- //modals -->
 
     <!-- alerts -->
@@ -204,6 +242,9 @@
                                 <b style="font-size: 16px;">@User_Name</b>
                                 <div style="font-size: 12px; color: #adb5bd;">2 minutes ago</div>
                             </div>
+                            <button class="btn btn-outline-secondary" onclick="editPostBtnClicked()" style="border-radius: 50%; padding: 8px; margin-left: auto;">
+                                <i class="bi bi-pencil"></i>
+                            </button>
                         </div>
 
                         <div class="card-body" onclick="postClicked()" style="cursor: pointer;">
@@ -213,136 +254,7 @@
                                 the post will look like, and to test the design of the post card...
                             </p>
 
-                            <img class="w-100 post-image" src="./placeholders/1.jpg" alt="Post Image">
-
-                            <div class="mt-3 mb-2">
-                                <button id="post-tags" class="badge rounded-pill me-1 text-light"
-                                    style="background-color: rgba(255, 255, 255, 0.1); border: 1px solid rgba(255, 255, 255, 0.2); font-weight: normal; padding: 7px 10px;">
-                                    #Tag1
-                                </button>
-                            </div>
-                            <hr>
-                            <hr>
-
-                            <div class="d-flex mt-3">
-                                <button
-                                    class="btn text-light d-flex align-items-center justify-content-center gap-2 w-100 py-2"
-                                    style="background-color: rgba(255, 255, 255, 0.05); border-radius: 12px; transition: 0.3s;">
-                                    <i class="bi bi-chat-right-text"></i>
-                                    <span>
-                                        3 Comments
-                                    </span>
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                    <!-- post end -->
-                      <!-- Post items will be dynamically added here -->
-                    <div class="card custom-card shadow-lg mb-5">
-
-                        <div class="card-header">
-                            <img src="./profile-pics/1.png" alt="" style="height: 45px; width: 45px; object-fit: cover;"
-                                class="rounded-circle border border-2 border-secondary">
-                            <div>
-                                <b style="font-size: 16px;">@User_Name</b>
-                                <div style="font-size: 12px; color: #adb5bd;">2 minutes ago</div>
-                            </div>
-                        </div>
-
-                        <div class="card-body">
-                            <h5 class="mb-3 text-white">Post Header</h5>
-                            <p style="color: #cbd5e1; line-height: 1.6;">
-                                the first post in the history of facecook, this is just a placeholder text to show how
-                                the post will look like, and to test the design of the post card...
-                            </p>
-
-                            <img class="w-100 post-image" src="./placeholders/1.jpg" alt="Post Image">
-
-                            <div class="mt-3 mb-2">
-                                <button id="post-tags" class="badge rounded-pill me-1 text-light"
-                                    style="background-color: rgba(255, 255, 255, 0.1); border: 1px solid rgba(255, 255, 255, 0.2); font-weight: normal; padding: 7px 10px;">
-                                    #Tag1
-                                </button>
-                            </div>
-                            <hr>
-                            <hr>
-
-                            <div class="d-flex mt-3">
-                                <button
-                                    class="btn text-light d-flex align-items-center justify-content-center gap-2 w-100 py-2"
-                                    style="background-color: rgba(255, 255, 255, 0.05); border-radius: 12px; transition: 0.3s;">
-                                    <i class="bi bi-chat-right-text"></i>
-                                    <span>
-                                        3 Comments
-                                    </span>
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                    <!-- post end -->
-                      <!-- Post items will be dynamically added here -->
-                    <div class="card custom-card shadow-lg mb-5">
-
-                        <div class="card-header">
-                            <img src="./profile-pics/1.png" alt="" style="height: 45px; width: 45px; object-fit: cover;"
-                                class="rounded-circle border border-2 border-secondary">
-                            <div>
-                                <b style="font-size: 16px;">@User_Name</b>
-                                <div style="font-size: 12px; color: #adb5bd;">2 minutes ago</div>
-                            </div>
-                        </div>
-
-                        <div class="card-body">
-                            <h5 class="mb-3 text-white">Post Header</h5>
-                            <p style="color: #cbd5e1; line-height: 1.6;">
-                                the first post in the history of facecook, this is just a placeholder text to show how
-                                the post will look like, and to test the design of the post card...
-                            </p>
-
-                            <img class="w-100 post-image" src="./placeholders/1.jpg" alt="Post Image">
-
-                            <div class="mt-3 mb-2">
-                                <button id="post-tags" class="badge rounded-pill me-1 text-light"
-                                    style="background-color: rgba(255, 255, 255, 0.1); border: 1px solid rgba(255, 255, 255, 0.2); font-weight: normal; padding: 7px 10px;">
-                                    #Tag1
-                                </button>
-                            </div>
-                            <hr>
-                            <hr>
-
-                            <div class="d-flex mt-3">
-                                <button
-                                    class="btn text-light d-flex align-items-center justify-content-center gap-2 w-100 py-2"
-                                    style="background-color: rgba(255, 255, 255, 0.05); border-radius: 12px; transition: 0.3s;">
-                                    <i class="bi bi-chat-right-text"></i>
-                                    <span>
-                                        3 Comments
-                                    </span>
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                    <!-- post end -->
-                    <!-- Post items will be dynamically added here -->
-                    <div class="card custom-card shadow-lg mb-5">
-
-                        <div class="card-header">
-                            <img src="./profile-pics/1.png" alt="" style="height: 45px; width: 45px; object-fit: cover;"
-                                class="rounded-circle border border-2 border-secondary">
-                            <div>
-                                <b style="font-size: 16px;">@User_Name</b>
-                                <div style="font-size: 12px; color: #adb5bd;">2 minutes ago</div>
-                            </div>
-                        </div>
-
-                        <div class="card-body">
-                            <h5 class="mb-3 text-white">Post Header</h5>
-                            <p style="color: #cbd5e1; line-height: 1.6;">
-                                the first post in the history of facecook, this is just a placeholder text to show how
-                                the post will look like, and to test the design of the post card...
-                            </p>
-
-                            <img class="w-100 post-image" src="./placeholders/1.jpg" alt="Post Image">
+                            <img class="w-100 post-image" src="./placeholders/3.jpg" alt="Post Image">
 
                             <div class="mt-3 mb-2">
                                 <button id="post-tags" class="badge rounded-pill me-1 text-light"
