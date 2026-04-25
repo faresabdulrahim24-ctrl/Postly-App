@@ -4,7 +4,9 @@ const postId = urlParams.get('postId');
 getPost();
 
 function getPost() {
-    axios.get(`https://tarmeezacademy.com/api/v1/posts/${postId}`)
+    const currentUser = getCurrentUser();
+
+    MockAPI.getPost(postId)
         .then((response) => {
             const post = response.data.data;
             const comments = post.comments;
@@ -79,8 +81,9 @@ function getPost() {
 
                     <div id="add-comment-container" class="card-footer border-0 p-3" style="background-color: #212529; border-radius: 0 0 15px 15px;">
                         <div class="d-flex align-items-center gap-3">
-                            <img src="./profile-pics/1.png" alt="" style="height: 40px; width: 40px; object-fit: cover;"
-                                class="rounded-circle border border-2 border-secondary">
+                            <img src="${currentUser ? currentUser.profile_image : './profile-pics/1.png'}" 
+                                    alt="" style="height: 40px; width: 40px; object-fit: cover;"
+                                    class="rounded-circle border border-2 border-secondary">
                             <input id="comment-input" type="text" class="form-control text-light" placeholder="Write a comment..." style="background-color: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255,255,255,0.1);">
                             <button class="btn btn-outline-secondary text-light px-4" style="border-radius: 12px;"
                                 onclick="commentBtnClicked()">Comment</button>
@@ -101,11 +104,8 @@ function commentBtnClicked() {
         "body": commentBody
     }
     let token = localStorage.getItem('token');
-    axios.post(`https://tarmeezacademy.com/api/v1/posts/${postId}/comments`, params, {
-        headers: {
-            "Authorization": `Bearer ${token}`
-        }
-    }).then((response) => {
+    MockAPI.createComment(postId, commentBody, token)
+        .then((response) => {
         getPost();
         showAlert('Comment added successfully!', 'success');
     }).catch((error) => {

@@ -18,7 +18,7 @@ function loginBtnClicked() {
         "password": password
     }
     
-    axios.post('https://tarmeezacademy.com/api/v1/login', params)
+    MockAPI.login(userName, password)
     .then((response) => {
         let token = response.data.token;
         localStorage.setItem('token', token);
@@ -54,9 +54,7 @@ function registerBtnClicked() {
         'Content-Type': 'multipart/form-data'
     }
     
-    axios.post('https://tarmeezacademy.com/api/v1/register', params, {
-        headers: headers
-    })  
+    MockAPI.register(name, userName, password, profileImage) 
     .then((response) => {
         let token = response.data.token;
         localStorage.setItem('token', token);
@@ -76,6 +74,8 @@ function registerBtnClicked() {
 }
 
 function logoutBtnClicked() {
+    const token = localStorage.getItem('token');
+    MockAPI.logout(token);              // ADD THIS
     localStorage.removeItem('token');
     localStorage.removeItem('username');
     showAlert('Logged out successfully!', 'success');
@@ -127,10 +127,11 @@ function setupUI() {
         
     } else { // user is logged in
         if(loggedInDiv) loggedInDiv.style.display = 'flex';
-        if(loginBtn) loginBtn.style.display = 'none';
+        if(loginBtn) loginBtn.style.display = 'none';   
         if(registerBtn) registerBtn.style.display = 'none';
         if (createPostBtn) createPostBtn.style.display = 'flex';
         if (profileBtn) profileBtn.style.display = 'flex';
+        if (addCommentContainer) addCommentContainer.style.display = 'flex';
         
         const userStr = localStorage.getItem('username');
         if(userStr) {

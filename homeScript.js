@@ -11,7 +11,7 @@ window.addEventListener('scroll', function () {
 })
 
 function getPosts(reload = true, page = 1) {
-    axios.get(`https://tarmeezacademy.com/api/v1/posts?limit=5&page=${page}`)
+    MockAPI.getPosts(5, page)
         .then((response) => {
             let posts = response.data.data;
             lastPageReached = response.data.meta.last_page;
@@ -93,29 +93,13 @@ function createPostBtnClicked() {
     let content = document.getElementById("post-content-input").value;
     let image = document.getElementById("post-image-input").files[0];
     
-    let formData = new FormData();
-    formData.append('title', header);
-    formData.append('body', content);
-    if (image != null) {
-        formData.append('image', image);
-    }
-    
     const token = localStorage.getItem('token');
-    const headers = {
-        'Content-Type': 'multipart/form-data',
-        'Authorization': `Bearer ${token}`
-    };
-
-    let url = `https://tarmeezacademy.com/api/v1/posts`;
-    if (!isCreate) {
-        url = `https://tarmeezacademy.com/api/v1/posts/${postId}`;
-        formData.append('_method', 'put');
-    }
     
-    axios.post(url, formData, {
-        headers: headers
-    })
-    .then((response) => {
+    const promise = isCreate
+    ? MockAPI.createPost(header, content, image, token)
+    : MockAPI.updatePost(postId, header, content, image, token);
+    
+    promise.then((response) => {
         showAlert(isCreate ? 'Post created successfully!' : 'Post updated successfully!', 'success');
         const modal = document.getElementById('add-post-modal');
         const modalInstance = bootstrap.Modal.getInstance(modal);
