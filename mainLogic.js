@@ -10,15 +10,10 @@ navItems.forEach(item => {
 });
 
 function loginBtnClicked() {
-    let userName = document.getElementById("username").value
-    let password = document.getElementById("password").value
+    let userName = document.getElementById("username").value;
+    let password = document.getElementById("password").value;
 
-    const params = {
-        "username": userName,
-        "password": password
-    }
-    
-    MockAPI.login(userName, password)
+    SupabaseAPI.login(userName, password)
     .then((response) => {
         let token = response.data.token;
         localStorage.setItem('token', token);
@@ -37,24 +32,13 @@ function loginBtnClicked() {
     });
 }
 
-function registerBtnClicked() { 
-    const name = document.getElementById('register-name-input').value;
-    const userName = document.getElementById('register-username-input').value;
-    const password = document.getElementById('register-password-input').value;
-    const profileImage = document.getElementById('register-image-input').files[0];
+function registerBtnClicked() {
+    const name          = document.getElementById('register-name-input').value;
+    const userName      = document.getElementById('register-username-input').value;
+    const password      = document.getElementById('register-password-input').value;
+    const profileImage  = document.getElementById('register-image-input').files[0];
 
-    const formData = new FormData();
-    formData.append('name', name);
-    formData.append('username', userName);
-    formData.append('password', password);
-    formData.append('profile_image', profileImage);
-
-    const params = formData;
-    headers = {
-        'Content-Type': 'multipart/form-data'
-    }
-    
-    MockAPI.register(name, userName, password, profileImage) 
+    SupabaseAPI.register(name, userName, password, profileImage)
     .then((response) => {
         let token = response.data.token;
         localStorage.setItem('token', token);
@@ -75,30 +59,29 @@ function registerBtnClicked() {
 
 function logoutBtnClicked() {
     const token = localStorage.getItem('token');
-    MockAPI.logout(token);              // ADD THIS
-    localStorage.removeItem('token');
-    localStorage.removeItem('username');
-    showAlert('Logged out successfully!', 'success');
-    setupUI();
+    SupabaseAPI.logout(token).finally(() => {
+        localStorage.removeItem('token');
+        localStorage.removeItem('username');
+        showAlert('Logged out successfully!', 'success');
+        setupUI();
+    });
 }
 
 function showAlert(message, type) {
     const alertPlaceholder = document.getElementById('success-alert');
     const wrapper = document.createElement('div');
-    
+
     wrapper.innerHTML = [
         `<div class="alert alert-${type} alert-dismissible fade show shadow-lg" role="alert" style="position: fixed; bottom: 20px; right: 20px; z-index: 1055; min-width: 250px;">`,
-        `   <strong>Success!</strong> ${message}`,
+        `   <strong>${type === 'success' ? 'Success!' : 'Error!'}</strong> ${message}`,
         '   <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>',
         '</div>'
     ].join('');
-    
+
     alertPlaceholder.append(wrapper);
 
-    // Auto remove alert after 3 seconds
     setTimeout(() => {
         const alertElement = wrapper.querySelector('.alert');
-
         if (alertElement) {
             const bsAlert = bootstrap.Alert.getOrCreateInstance(alertElement);
             bsAlert.close();
@@ -107,40 +90,37 @@ function showAlert(message, type) {
 }
 
 function setupUI() {
-    const token = localStorage.getItem('token')
+    const token = localStorage.getItem('token');
 
-    const loginBtn = document.getElementById('login-btn');
-    const registerBtn = document.getElementById('register-btn');
-    const loggedInDiv = document.getElementById('logged-in-div');
-    const createPostBtn = document.getElementById('add-btn');
-    const profileBtn = document.getElementById('profile-btn');
+    const loginBtn          = document.getElementById('login-btn');
+    const registerBtn       = document.getElementById('register-btn');
+    const loggedInDiv       = document.getElementById('logged-in-div');
+    const createPostBtn     = document.getElementById('add-btn');
+    const profileBtn        = document.getElementById('profile-btn');
     const addCommentContainer = document.getElementById('add-comment-container');
 
-    if(token == null) //user is guest
-    {
-        if(loginBtn) loginBtn.style.display = 'flex';
-        if(registerBtn) registerBtn.style.display = 'flex';
-        if(loggedInDiv) loggedInDiv.style.display = 'none';
-        if(createPostBtn) createPostBtn.style.display = 'none'; 
-        if (profileBtn) profileBtn.style.display = 'none';
-        if (addCommentContainer) addCommentContainer.style.display = 'none';
-        
-    } else { // user is logged in
-        if(loggedInDiv) loggedInDiv.style.display = 'flex';
-        if(loginBtn) loginBtn.style.display = 'none';   
-        if(registerBtn) registerBtn.style.display = 'none';
-        if (createPostBtn) createPostBtn.style.display = 'flex';
-        if (profileBtn) profileBtn.style.display = 'flex';
-        if (addCommentContainer) addCommentContainer.style.display = 'flex';
-        
+    if (token == null) {
+        if (loginBtn)             loginBtn.style.display = 'flex';
+        if (registerBtn)          registerBtn.style.display = 'flex';
+        if (loggedInDiv)          loggedInDiv.style.display = 'none';
+        if (createPostBtn)        createPostBtn.style.display = 'none';
+        if (profileBtn)           profileBtn.style.display = 'none';
+        if (addCommentContainer)  addCommentContainer.style.display = 'none';
+    } else {
+        if (loggedInDiv)    loggedInDiv.style.display = 'flex';
+        if (loginBtn)       loginBtn.style.display = 'none';
+        if (registerBtn)    registerBtn.style.display = 'none';
+        if (createPostBtn)  createPostBtn.style.display = 'flex';
+        if (profileBtn)     profileBtn.style.display = 'flex';
+
         const userStr = localStorage.getItem('username');
-        if(userStr) {
+        if (userStr) {
             const user = JSON.parse(userStr);
             const usernameEl = document.getElementById('logged-in-username');
-            if(usernameEl) usernameEl.innerText = `@${user.username}`;
-            
+            if (usernameEl) usernameEl.innerText = `@${user.username}`;
+
             const userImgEl = document.getElementById('nav-user-image');
-            if(userImgEl && user.profile_image && typeof user.profile_image === 'string') {
+            if (userImgEl && user.profile_image && typeof user.profile_image === 'string') {
                 userImgEl.src = user.profile_image;
             }
         }
@@ -151,17 +131,15 @@ let lastScrollTop = 0;
 window.addEventListener('scroll', function() {
     let currentScroll = window.scrollY || document.documentElement.scrollTop;
     let navbar = document.getElementById('main-nav');
-    
-    // Hide navbar if scrolled down past 100px. Show if scrolled up.
     if (currentScroll > lastScrollTop && currentScroll > 100) {
-        navbar.style.top = "-120px"; 
+        navbar.style.top = "-120px";
     } else {
-        navbar.style.top = "0px";   
+        navbar.style.top = "0px";
     }
     lastScrollTop = currentScroll <= 0 ? 0 : currentScroll;
 });
 
-function getCurrentUser() { 
+function getCurrentUser() {
     let user = null;
     const storagedUser = localStorage.getItem('username');
     if (storagedUser != null) {

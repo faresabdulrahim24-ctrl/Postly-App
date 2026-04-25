@@ -1,115 +1,131 @@
-const urlParams = new URLSearchParams(window.location.search);
-const postId = urlParams.get('postId');
+getPosts();
 
-getPost();
+// infinite scroll
+let currentPage = 1;
+let lastPageReached = 1;
+window.addEventListener('scroll', function () {
+    const endOfPage = window.innerHeight + window.pageYOffset >= document.body.offsetHeight;
+    if (endOfPage && currentPage < lastPageReached) {
+        getPosts(false, ++currentPage);
+    }
+});
 
-function getPost() {
-    const currentUser = getCurrentUser();
-
-    MockAPI.getPost(postId)
+function getPosts(reload = true, page = 1) {
+    SupabaseAPI.getPosts(5, page)
         .then((response) => {
-            const post = response.data.data;
-            const comments = post.comments;
-            const author = post.author;
+            let posts = response.data.data;
+            lastPageReached = response.data.meta.last_page;
 
-            let postTitle = "";
-            if (post.title != null) {
-                postTitle = post.title;
+            if (reload) {
+                document.getElementById('posts').innerHTML = "";
             }
-            document.getElementById('username-span').textContent = `${author.username}'s`;
 
-            let commentsContent = "";
-            for (let comment of comments) {
-                commentsContent += `
-                    <div class="d-flex align-items-start gap-3 mb-3 pb-3 border-bottom border-secondary border-opacity-10">
-                        <img src="${comment.author.profile_image}" alt="" style="height: 40px; width: 40px; object-fit: cover;"
+            for (let post of posts) {
+                let author = post.author;
+                let postTitle = post.title != null ? post.title : "";
+
+                let content = `
+                <div class="card custom-card shadow-lg mb-5">
+                    <div class="card-header">
+                        <img src="${author.profile_image}" alt="" style="height: 45px; width: 45px; object-fit: cover;"
                             class="rounded-circle border border-2 border-secondary">
                         <div>
-                            <b class="text-white" style="font-size: 14px;">@${comment.author.username}</b>
-                            <p style="font-size: 13px; color: #cbd5e1; margin-bottom: 0; margin-top: 3px;">
-                                ${comment.body}
-                            </p>
+                            <b style="font-size: 16px;">@${author.username}</b>
+                            <div style="font-size: 12px; color: #adb5bd;">${post.created_at}</div>
                         </div>
-                    </div>`;
-            }
-
-            let tagsHTML = "";
-            if (post.tags && post.tags.length > 0) {
-                tagsHTML = `
-                <button class="badge rounded-pill me-1 text-light" style="background-color: rgba(255, 255, 255, 0.1); border: 1px solid rgba(255, 255, 255, 0.2); font-weight: normal; padding: 7px 10px;">
-                    #${post.tags[0].name}
-                </button>`;
-            }
-            const postContent = `
-                <div class="card custom-card shadow-lg mb-5 border-0" style="background: linear-gradient(145deg, rgba(11, 19, 43, 0.7), rgba(34, 40, 49, 0.9));">
-                    <div class="card-header border-0 pb-0 pt-4 px-4 d-flex justify-content-between align-items-center bg-transparent">
-                        <div class="d-flex align-items-center gap-3">
-                            <img src="${author.profile_image}" alt="" style="height: 55px; width: 55px; object-fit: cover;"
-                                class="rounded-circle border border-2 border-primary shadow-sm">
-                            <div>
-                                <b class="text-white d-flex align-items-center gap-1" style="font-size: 18px;">
-                                    ${author.username} <i class="bi bi-patch-check-fill text-primary" style="font-size: 15px;"></i>
-                                </b>
-                                <div style="font-size: 13px; color: #adb5bd;">${post.created_at}</div>
-                            </div>
-                        </div>
+                        <button class="btn btn-outline-secondary" onclick="editPostBtnClicked('${encodeURIComponent(JSON.stringify(post)).replace(/'/g, "%27")}')" style="border-radius: 50%; padding: 8px; margin-left: auto;">
+                            <i class="bi bi-pencil"></i>
+                        </button>
                     </div>
 
-                    <div class="card-body px-4">
-                        <h4 class="mb-3 text-white fw-bold">${postTitle}</h4>
-                        <p style="color: #e2e8f0; line-height: 1.8; font-size: 17px;">
+                    <div class="card-body" onclick="postClicked(${post.id})" style="cursor: pointer;">
+                        <h5 class="mb-3 text-white">${postTitle}</h5>
+                        <p style="color: #cbd5e1; line-height: 1.6;">
                             ${post.body}
                         </p>
 
-                        <div class="mb-3" id="post-tags">
-                            ${tagsHTML}
-                        </div>
+                        ${typeof post.image === 'string' ? `<img class="w-100 post-image" src="${post.image}" alt="Post Image" style="cursor: pointer;" onclick="event.stopPropagation(); openImage('${post.image}')">` : ''}
 
-                        ${typeof post.image === 'string' ? `<img class="w-100 post-image rounded-4 shadow-sm" src="${post.image}" alt="Post Image" style="max-height: 500px; object-fit: cover; cursor: pointer;" onclick="event.stopPropagation(); openImage('${post.image}')">` : ''}
+                        <div class="mt-3 mb-2" id="post-tags-${post.id}"></div>
 
-                        <div class="d-flex justify-content-between align-items-center mt-4 pt-3 border-top border-secondary border-opacity-25">
-                            <button class="btn text-light d-flex align-items-center justify-content-center gap-2 custom-action-btn flex-grow-1">
-                                <i class="bi bi-chat-text"></i> <span>${post.comments_count} Comments</span>
+                        <hr><hr>
+
+                        <div class="d-flex mt-3">
+                            <button class="btn text-light d-flex align-items-center justify-content-center gap-2 w-100 py-2"
+                                style="background-color: rgba(255, 255, 255, 0.05); border-radius: 12px; transition: 0.3s;">
+                                <i class="bi bi-chat-right-text"></i>
+                                <span>${post.comments_count} Comments</span>
                             </button>
-                        </div>
-
-                        <div id="comments-container" class="mt-4 pt-3 border-top border-secondary border-opacity-25 px-3">
-                            <h6 class="text-white mb-4"><i class="bi bi-chat-text me-2"></i>Comments</h6>
-                            ${commentsContent}
-                        </div>
-                    </div> 
-
-                    <div id="add-comment-container" class="card-footer border-0 p-3" style="background-color: #212529; border-radius: 0 0 15px 15px;">
-                        <div class="d-flex align-items-center gap-3">
-                            <img src="${currentUser ? currentUser.profile_image : './profile-pics/1.png'}" 
-                                    alt="" style="height: 40px; width: 40px; object-fit: cover;"
-                                    class="rounded-circle border border-2 border-secondary">
-                            <input id="comment-input" type="text" class="form-control text-light" placeholder="Write a comment..." style="background-color: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255,255,255,0.1);">
-                            <button class="btn btn-outline-secondary text-light px-4" style="border-radius: 12px;"
-                                onclick="commentBtnClicked()">Comment</button>
                         </div>
                     </div>
                 </div>`;
 
-            document.getElementById('post').innerHTML = postContent;
+                document.getElementById('posts').innerHTML += content;
 
+                // Render tags
+                const tagsContainer = document.getElementById(`post-tags-${post.id}`);
+                if (tagsContainer) {
+                    tagsContainer.innerHTML = "";
+                    for (let tag of post.tags) {
+                        tagsContainer.innerHTML += `
+                        <button class="badge rounded-pill me-1 text-light" style="background-color: rgba(255, 255, 255, 0.1); border: 1px solid rgba(255, 255, 255, 0.2); font-weight: normal; padding: 5px 10px;">
+                            ${tag.name}
+                        </button>`;
+                    }
+                }
+            }
         }).catch((error) => {
-            console.error('Error fetching post:', error);
+            console.error('Error fetching posts:', error);
         });
 }
 
-function commentBtnClicked() { 
-    let commentBody = document.getElementById('comment-input').value;
-    let params = {
-        "body": commentBody
-    }
-    let token = localStorage.getItem('token');
-    MockAPI.createComment(postId, commentBody, token)
-        .then((response) => {
-        getPost();
-        showAlert('Comment added successfully!', 'success');
+function createPostBtnClicked() {
+    let postId  = document.getElementById("post-id").value;
+    let isCreate = postId == null || postId == "";
+
+    let header  = document.getElementById("post-header-input").value;
+    let content = document.getElementById("post-content-input").value;
+    let image   = document.getElementById("post-image-input").files[0];
+    const token = localStorage.getItem('token');
+
+    const promise = isCreate
+        ? SupabaseAPI.createPost(header, content, image, token)
+        : SupabaseAPI.updatePost(postId, header, content, image, token);
+
+    promise.then((response) => {
+        showAlert(isCreate ? 'Post created successfully!' : 'Post updated successfully!', 'success');
+        const modal = document.getElementById('add-post-modal');
+        const modalInstance = bootstrap.Modal.getInstance(modal);
+        modalInstance.hide();
+        getPosts();
+
+        // Reset form
+        document.getElementById("post-id").value = "";
+        document.getElementById("addPostModalTitle").innerHTML = "Create A New Post";
+        document.getElementById("post-header-input").value = "";
+        document.getElementById("post-content-input").value = "";
+        document.getElementById("post-image-input").value = "";
     }).catch((error) => {
         const message = error.response.data.message;
         showAlert(message, 'danger');
+        console.error('Action failed:', message);
     });
+}
+
+function editPostBtnClicked(postObject) {
+    if (!postObject) return;
+    let post = JSON.parse(decodeURIComponent(postObject));
+
+    document.getElementById("post-id").value = post.id;
+    document.getElementById("addPostModalTitle").innerHTML = "Edit Post";
+    document.getElementById("post-header-input").value = post.title || "";
+    document.getElementById("post-content-input").value = post.body;
+
+    let postModal = new bootstrap.Modal(document.getElementById('add-post-modal'), {});
+    postModal.toggle();
+}
+
+function postClicked(postId) {
+    if (postId === undefined || postId === null) return;
+    window.location.href = `postDetails.html?postId=${postId}`;
 }
