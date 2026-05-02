@@ -2,7 +2,7 @@ setupUI();
 
 const navItems = document.querySelectorAll('.nav-item:not(.brand-item)');
 navItems.forEach(item => {
-    item.addEventListener('click', function(e){
+    item.addEventListener('click', function(e) {
         e.preventDefault();
         navItems.forEach(nav => nav.classList.remove('active'));
         this.classList.add('active');
@@ -15,51 +15,37 @@ function loginBtnClicked() {
 
     SupabaseAPI.login(userName, password)
     .then((response) => {
-        let token = response.data.token;
-        localStorage.setItem('token', token);
+        localStorage.setItem('token', response.data.token);
         localStorage.setItem('username', JSON.stringify(response.data.user));
-
-        const modal = document.getElementById('login-modal');
-        const modalInstance = bootstrap.Modal.getInstance(modal);
-        modalInstance.hide();
+        bootstrap.Modal.getInstance(document.getElementById('login-modal')).hide();
         showAlert('Logged in successfully!', 'success');
         setupUI();
-
     }).catch((error) => {
-        const message = error.response.data.message;
-        showAlert(message, 'danger');
-        console.error('Login failed:', message);
+        showAlert(error.response.data.message, 'danger');
     });
 }
 
 function registerBtnClicked() {
-    const name          = document.getElementById('register-name-input').value;
-    const userName      = document.getElementById('register-username-input').value;
-    const password      = document.getElementById('register-password-input').value;
-    const profileImage  = document.getElementById('register-image-input').files[0];
+    const name         = document.getElementById('register-name-input').value;
+    const userName     = document.getElementById('register-username-input').value;
+    const email        = document.getElementById('register-email-input').value;
+    const password     = document.getElementById('register-password-input').value;
+    const profileImage = document.getElementById('register-image-input').files[0];
 
-    SupabaseAPI.register(name, userName, password, profileImage)
+    SupabaseAPI.register(name, userName, email, password, profileImage)
     .then((response) => {
-        let token = response.data.token;
-        localStorage.setItem('token', token);
+        localStorage.setItem('token', response.data.token);
         localStorage.setItem('username', JSON.stringify(response.data.user));
-
-        const modal = document.getElementById('register-modal');
-        const modalInstance = bootstrap.Modal.getInstance(modal);
-        modalInstance.hide();
+        bootstrap.Modal.getInstance(document.getElementById('register-modal')).hide();
         showAlert('Registered successfully!', 'success');
         setupUI();
-
     }).catch((error) => {
-        const message = error.response.data.message;
-        showAlert(message, 'danger');
-        console.error('Registration failed:', message);
+        showAlert(error.response.data.message, 'danger');
     });
 }
 
 function logoutBtnClicked() {
-    const token = localStorage.getItem('token');
-    SupabaseAPI.logout(token).finally(() => {
+    SupabaseAPI.logout().finally(() => {
         localStorage.removeItem('token');
         localStorage.removeItem('username');
         showAlert('Logged out successfully!', 'success');
@@ -70,65 +56,57 @@ function logoutBtnClicked() {
 function showAlert(message, type) {
     const alertPlaceholder = document.getElementById('success-alert');
     const wrapper = document.createElement('div');
-
-    wrapper.innerHTML = [
-        `<div class="alert alert-${type} alert-dismissible fade show shadow-lg" role="alert" style="position: fixed; bottom: 20px; right: 20px; z-index: 1055; min-width: 250px;">`,
-        `   <strong>${type === 'success' ? 'Success!' : 'Error!'}</strong> ${message}`,
-        '   <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>',
-        '</div>'
-    ].join('');
-
+    wrapper.innerHTML = `
+        <div class="alert alert-${type} alert-dismissible fade show shadow-lg" role="alert"
+             style="position: fixed; bottom: 20px; right: 20px; z-index: 1055; min-width: 250px;">
+            <strong>${type === 'success' ? 'Success!' : 'Error!'}</strong> ${message}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>`;
     alertPlaceholder.append(wrapper);
-
     setTimeout(() => {
-        const alertElement = wrapper.querySelector('.alert');
-        if (alertElement) {
-            const bsAlert = bootstrap.Alert.getOrCreateInstance(alertElement);
-            bsAlert.close();
-        }
+        const alertEl = wrapper.querySelector('.alert');
+        if (alertEl) bootstrap.Alert.getOrCreateInstance(alertEl).close();
     }, 3000);
 }
 
 function setupUI() {
     const token = localStorage.getItem('token');
 
-    const loginBtn          = document.getElementById('login-btn');
-    const registerBtn       = document.getElementById('register-btn');
-    const loggedInDiv       = document.getElementById('logged-in-div');
-    const createPostBtn     = document.getElementById('add-btn');
-    const profileBtn        = document.getElementById('profile-btn');
+    const loginBtn            = document.getElementById('login-btn');
+    const registerBtn         = document.getElementById('register-btn');
+    const loggedInDiv         = document.getElementById('logged-in-div');
+    const createPostBtn       = document.getElementById('add-btn');
+    const profileBtn          = document.getElementById('profile-btn');
     const addCommentContainer = document.getElementById('add-comment-container');
 
-    if (token == null) {
-        if (loginBtn)             loginBtn.style.display = 'flex';
-        if (registerBtn)          registerBtn.style.display = 'flex';
-        if (loggedInDiv)          loggedInDiv.style.display = 'none';
-        if (createPostBtn)        createPostBtn.style.display = 'none';
-        if (profileBtn)           profileBtn.style.display = 'none';
-        if (addCommentContainer)  addCommentContainer.style.display = 'none';
+    if (!token) {
+        if (loginBtn)            loginBtn.style.display = 'flex';
+        if (registerBtn)         registerBtn.style.display = 'flex';
+        if (loggedInDiv)         loggedInDiv.style.display = 'none';
+        if (createPostBtn)       createPostBtn.style.display = 'none';
+        if (profileBtn)          profileBtn.style.display = 'none';
+        if (addCommentContainer) addCommentContainer.style.display = 'none';
     } else {
-        if (loggedInDiv)    loggedInDiv.style.display = 'flex';
-        if (loginBtn)       loginBtn.style.display = 'none';
-        if (registerBtn)    registerBtn.style.display = 'none';
-        if (createPostBtn)  createPostBtn.style.display = 'flex';
-        if (profileBtn)     profileBtn.style.display = 'flex';
+        if (loginBtn)      loginBtn.style.display = 'none';
+        if (registerBtn)   registerBtn.style.display = 'none';
+        if (loggedInDiv)   loggedInDiv.style.display = 'flex';
+        if (createPostBtn) createPostBtn.style.display = 'flex';
+        if (profileBtn)    profileBtn.style.display = 'flex';
+        if (addCommentContainer) addCommentContainer.style.display = 'flex';
 
         const userStr = localStorage.getItem('username');
         if (userStr) {
             const user = JSON.parse(userStr);
             const usernameEl = document.getElementById('logged-in-username');
             if (usernameEl) usernameEl.innerText = `@${user.username}`;
-
             const userImgEl = document.getElementById('nav-user-image');
-            if (userImgEl && user.profile_image && typeof user.profile_image === 'string') {
-                userImgEl.src = user.profile_image;
-            }
+            if (userImgEl && user.profile_image) userImgEl.src = user.profile_image;
         }
     }
 }
 
 let lastScrollTop = 0;
-window.addEventListener('scroll', function() {
+window.addEventListener('scroll', function () {
     let currentScroll = window.scrollY || document.documentElement.scrollTop;
     let navbar = document.getElementById('main-nav');
     if (currentScroll > lastScrollTop && currentScroll > 100) {
@@ -140,16 +118,11 @@ window.addEventListener('scroll', function() {
 });
 
 function getCurrentUser() {
-    let user = null;
-    const storagedUser = localStorage.getItem('username');
-    if (storagedUser != null) {
-        user = JSON.parse(storagedUser);
-    }
-    return user;
+    const stored = localStorage.getItem('username');
+    return stored ? JSON.parse(stored) : null;
 }
 
 function openImage(imageUrl) {
     document.getElementById('modal-displayed-image').src = imageUrl;
-    const imageModal = new bootstrap.Modal(document.getElementById('image-viewer-modal'));
-    imageModal.show();
+    new bootstrap.Modal(document.getElementById('image-viewer-modal')).show();
 }

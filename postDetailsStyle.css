@@ -31,3 +31,15 @@
     transform: translateX(-5px);
     box-shadow: 0 0 15px rgba(13, 110, 253, 0.3);
 }
+
+.custom-comment-input::placeholder {
+    color: #adb5bd !important;
+    opacity: 0.9;
+}
+
+.custom-comment-input:focus {
+    background-color: rgba(255, 255, 255, 0.12) !important;
+    border-color: rgba(255, 255, 255, 0.3) !important;
+    color: white !important;
+    box-shadow: none !important;
+}
