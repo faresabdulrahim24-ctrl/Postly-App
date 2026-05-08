@@ -28,7 +28,7 @@ const MockAPI = (() => {
     ],
 
     posts: [
-      { id: 1, title: 'Welcome to Faresbook!',  body: 'This is the very first post on our platform. Glad to have you here!',           image: 'https://picsum.photos/seed/p1/800/400', tags: [{ id: 1, name: 'welcome' }, { id: 2, name: 'first' }],            author_id: 1, created_at: '2025-04-20T10:00:00.000000Z' },
+      { id: 1, title: 'Welcome to Postly!',  body: 'This is the very first post on our platform. Glad to have you here!',           image: 'https://picsum.photos/seed/p1/800/400', tags: [{ id: 1, name: 'welcome' }, { id: 2, name: 'first' }],            author_id: 1, created_at: '2025-04-20T10:00:00.000000Z' },
       { id: 2, title: 'Sunset Photography',      body: 'Caught this beautiful sunset yesterday evening. Nature never fails to amaze.',  image: 'https://picsum.photos/seed/p2/800/400', tags: [{ id: 3, name: 'photography' }, { id: 4, name: 'nature' }],       author_id: 2, created_at: '2025-04-21T15:30:00.000000Z' },
       { id: 3, title: 'Learning JavaScript',     body: 'Just finished a great advanced JS course. Highly recommend it to everyone!',   image: null,                                    tags: [{ id: 5, name: 'coding' }, { id: 6, name: 'javascript' }],       author_id: 3, created_at: '2025-04-21T18:00:00.000000Z' },
       { id: 4, title: 'Coffee Time',             body: 'Nothing like a morning coffee to kickstart the day. What is your go-to drink?',image: 'https://picsum.photos/seed/p4/800/400', tags: [{ id: 7, name: 'coffee' }, { id: 8, name: 'morning' }],          author_id: 1, created_at: '2025-04-22T08:00:00.000000Z' },

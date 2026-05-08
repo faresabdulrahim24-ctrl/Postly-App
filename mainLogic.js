@@ -33,7 +33,7 @@ function loginBtnClicked() {
 function registerBtnClicked() {
     const name         = document.getElementById('register-name-input').value;
     const userName     = document.getElementById('register-username-input').value;
-    const email        = `${userName}@faresbook.app`;
+    const email        = `${userName}@postly.app`;
     const password     = document.getElementById('register-password-input').value;
     const profileImage = document.getElementById('register-image-input').files[0];
 

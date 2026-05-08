@@ -60,7 +60,7 @@ window.SupabaseAPI = {
 
         if (!usernameOrEmail.includes('@')) {
             // It's a username, try to construct the default email pattern
-            emailToTry = `${usernameOrEmail}@faresbook.app`;
+            emailToTry = `${usernameOrEmail}@postly.app`;
         }
 
         const { data, error } = await _db.auth.signInWithPassword({
