@@ -5,7 +5,7 @@ getPost();
 
 function getPost() {
     if (!postId) {
-        window.location.href = 'Home.html';
+        window.location.href = 'index.html';
         return;
     }
 

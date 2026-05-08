@@ -6,7 +6,7 @@ if (!targetUserId) {
     if (userStr) {
         targetUserId = JSON.parse(userStr).id;
     } else {
-        window.location.href = 'Home.html';
+        window.location.href = 'index.html';
     }
 }
 
