@@ -21,6 +21,7 @@ function getPosts(reload = true, page = 1) {
         for (let post of posts) {
             const author    = post.author;
             const postTitle = post.title || "";
+            const safeProfileImage = (author.profile_image || "").replace(/"/g, "'");
 
             let actionButtons = "";
             const userStr = localStorage.getItem('username');
@@ -48,7 +49,7 @@ function getPosts(reload = true, page = 1) {
             <div class="card custom-card shadow-lg mb-5">
                 <div class="card-header d-flex align-items-center">
                     <div style="cursor:pointer; display:flex; align-items:center; gap:10px;" onclick="userClicked('${author.id}')">
-                        <img src="${author.profile_image}" alt="" loading="lazy"
+                        <img src="${safeProfileImage}" alt="" loading="lazy"
                             style="height:45px;width:45px;object-fit:cover;"
                             class="rounded-circle border border-2 border-secondary">
                         <div>

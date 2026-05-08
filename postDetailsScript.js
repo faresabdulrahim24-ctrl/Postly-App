@@ -20,9 +20,11 @@ function getPost() {
 
         document.getElementById('username-span').textContent = `${author.name}'s`;
 
-        const commentsHTML = comments.map(comment => `
+        const commentsHTML = comments.map(comment => {
+            const commentAvatar = (comment.author.profile_image || "").replace(/"/g, "'");
+            return `
         <div class="d-flex align-items-start gap-3 mb-4">
-            <img src="${comment.author.profile_image}" alt="" loading="lazy"
+            <img src="${commentAvatar}" alt="" loading="lazy"
                 style="height:45px;width:45px;object-fit:cover;flex-shrink:0;cursor:pointer;"
                 class="rounded-circle border border-2 border-secondary shadow-sm" onclick="userClicked('${comment.author.id}')">
             <div style="background-color: rgba(255,255,255,0.06); border-radius: 0 15px 15px 15px; padding: 12px 16px; flex-grow:1; border: 1px solid rgba(255,255,255,0.05);">
@@ -31,8 +33,8 @@ function getPost() {
                     ${comment.body}
                 </p>
             </div>
-        </div>`
-        ).join('');
+        </div>`;
+        }).join('');
 
         // Build tags HTML
         const tagsHTML = (post.tags || []).map(tag => `
@@ -42,7 +44,8 @@ function getPost() {
             </button>`
         ).join('');
 
-        const userAvatar = currentUser?.profile_image || 'https://i.pravatar.cc/150?img=1';
+        const userAvatar = (currentUser?.profile_image || 'https://i.pravatar.cc/150?img=1').replace(/"/g, "'");
+        const authorAvatar = (author.profile_image || "").replace(/"/g, "'");
 
         document.getElementById('post').innerHTML = `
         <div class="card custom-card shadow-lg mb-5 border-0"
@@ -50,7 +53,7 @@ function getPost() {
 
             <div class="card-header border-0 pb-0 pt-4 px-4 bg-transparent">
                 <div class="d-flex align-items-center gap-3" style="cursor:pointer;" onclick="userClicked('${author.id}')">
-                    <img src="${author.profile_image}" alt="" loading="lazy"
+                    <img src="${authorAvatar}" alt="" loading="lazy"
                         style="height:55px;width:55px;object-fit:cover;"
                         class="rounded-circle border border-2 border-primary shadow-sm">
                     <div>

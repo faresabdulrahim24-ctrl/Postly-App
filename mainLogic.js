@@ -110,7 +110,7 @@ function setupUI() {
             const usernameEl = document.getElementById('logged-in-username');
             if (usernameEl) usernameEl.innerText = `${user.name}`;
             const userImgEl = document.getElementById('nav-user-image');
-            if (userImgEl && user.profile_image) userImgEl.src = user.profile_image;
+            if (userImgEl && user.profile_image) userImgEl.src = user.profile_image.replace(/"/g, "'");
         }
     }
 }

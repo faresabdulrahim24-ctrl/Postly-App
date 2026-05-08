@@ -18,7 +18,7 @@ if (targetUserId) {
 function getUserInfo() {
     SupabaseAPI.showUser(targetUserId).then(res => {
         const user = res.data.data;
-        document.getElementById('profile-image').src = user.profile_image || 'https://i.pravatar.cc/150?img=1';
+        document.getElementById('profile-image').src = (user.profile_image || 'https://i.pravatar.cc/150?img=1').replace(/"/g, "'");
         document.getElementById('profile-name').innerText = user.name;
         document.getElementById('profile-username').innerText = '@' + user.username;
         document.getElementById('profile-header').style.display = 'block';
@@ -55,6 +55,7 @@ function getPosts(reload = true, page = 1) {
         for (let post of posts) {
             const author    = post.author;
             const postTitle = post.title || "";
+            const safeProfileImage = (author.profile_image || "").replace(/"/g, "'");
 
             let actionButtons = "";
             const userStr = localStorage.getItem('username');
@@ -82,7 +83,7 @@ function getPosts(reload = true, page = 1) {
             <div class="card custom-card shadow-lg mb-5">
                 <div class="card-header d-flex align-items-center">
                     <div style="cursor:pointer; display:flex; align-items:center; gap:10px;" onclick="userClicked('${author.id}')">
-                        <img src="${author.profile_image}" alt="" loading="lazy"
+                        <img src="${safeProfileImage}" alt="" loading="lazy"
                             style="height:45px;width:45px;object-fit:cover;"
                             class="rounded-circle border border-2 border-secondary">
                         <div>
