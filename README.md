@@ -50,4 +50,3 @@ To run this project locally, you don't need any complex build tools. You just ne
 Postly places a heavy emphasis on visual aesthetics. From the custom loader overlay to the elegantly crafted glassmorphism modals and navigation bar, every element is designed to provide a cohesive and modern user experience.
 
 ---
-*Developed with ❤️ as an Advanced JavaScript Final Project.*
