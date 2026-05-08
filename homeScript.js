@@ -48,7 +48,7 @@ function getPosts(reload = true, page = 1) {
             <div class="card custom-card shadow-lg mb-5">
                 <div class="card-header d-flex align-items-center">
                     <div style="cursor:pointer; display:flex; align-items:center; gap:10px;" onclick="userClicked('${author.id}')">
-                        <img src="${author.profile_image}" alt=""
+                        <img src="${author.profile_image}" alt="" loading="lazy"
                             style="height:45px;width:45px;object-fit:cover;"
                             class="rounded-circle border border-2 border-secondary">
                         <div>
@@ -61,7 +61,7 @@ function getPosts(reload = true, page = 1) {
                 <div class="card-body" onclick="postClicked(${post.id})" style="cursor:pointer;">
                     <h5 class="mb-3 text-white">${postTitle}</h5>
                     <p style="color:#cbd5e1;line-height:1.6;">${post.body}</p>
-                    ${post.image ? `<img class="w-100 post-image" src="${post.image}" alt="Post Image"
+                    ${post.image ? `<img class="w-100 post-image" src="${post.image}" alt="Post Image" loading="lazy"
                         style="cursor:pointer;" onclick="event.stopPropagation();openImage('${post.image}')">` : ''}
                     <div class="mt-3 mb-2" id="post-tags-${post.id}"></div>
                     <hr><hr>

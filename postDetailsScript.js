@@ -22,7 +22,7 @@ function getPost() {
 
         const commentsHTML = comments.map(comment => `
         <div class="d-flex align-items-start gap-3 mb-4">
-            <img src="${comment.author.profile_image}" alt=""
+            <img src="${comment.author.profile_image}" alt="" loading="lazy"
                 style="height:45px;width:45px;object-fit:cover;flex-shrink:0;cursor:pointer;"
                 class="rounded-circle border border-2 border-secondary shadow-sm" onclick="userClicked('${comment.author.id}')">
             <div style="background-color: rgba(255,255,255,0.06); border-radius: 0 15px 15px 15px; padding: 12px 16px; flex-grow:1; border: 1px solid rgba(255,255,255,0.05);">
@@ -50,7 +50,7 @@ function getPost() {
 
             <div class="card-header border-0 pb-0 pt-4 px-4 bg-transparent">
                 <div class="d-flex align-items-center gap-3" style="cursor:pointer;" onclick="userClicked('${author.id}')">
-                    <img src="${author.profile_image}" alt=""
+                    <img src="${author.profile_image}" alt="" loading="lazy"
                         style="height:55px;width:55px;object-fit:cover;"
                         class="rounded-circle border border-2 border-primary shadow-sm">
                     <div>
@@ -72,7 +72,7 @@ function getPost() {
                 <div class="mb-3">${tagsHTML}</div>
 
                 ${post.image ? `
-                <img class="w-100 post-image rounded-4 shadow-sm mb-3" src="${post.image}" alt="Post Image"
+                <img class="w-100 post-image rounded-4 shadow-sm mb-3" src="${post.image}" alt="Post Image" loading="lazy"
                     style="max-height:500px;object-fit:cover;cursor:pointer;"
                     onclick="openImage('${post.image}')">` : ''}
 
@@ -95,7 +95,7 @@ function getPost() {
             <div id="add-comment-container" class="card-footer bg-transparent border-0 p-3 p-md-4"
                 style="border-top: 1px solid rgba(255,255,255,0.1) !important;">
                 <div class="d-flex align-items-center gap-2 gap-md-3 w-100">
-                    <img src="${userAvatar}" alt=""
+                    <img src="${userAvatar}" alt="" loading="lazy"
                         style="height:40px;width:40px;object-fit:cover;"
                         class="rounded-circle border border-2 border-secondary shadow-sm d-none d-sm-block">
                     
