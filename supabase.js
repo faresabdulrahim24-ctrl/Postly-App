@@ -9,7 +9,15 @@ const SUPABASE_KEY = 'sb_publishable_1_MRbzEkKR_2XadF5xl-Gg_LtuWrSZX';
 const _db = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
 function _ok(data)           { return Promise.resolve({ data }); }
-function _err(msg, code=422) { return Promise.reject({ response: { status: code, data: { message: msg } } }); }
+function _err(msg, code=422) {
+    if (code === 401 && msg === 'Unauthenticated.') {
+        localStorage.removeItem('token');
+        localStorage.removeItem('username');
+        if (typeof setupUI === 'function') setupUI();
+        msg = 'Your session has expired. Please log in again.';
+    }
+    return Promise.reject({ response: { status: code, data: { message: msg } } });
+}
 
 async function _getFullPost(postId) {
     const { data: post, error } = await _db
