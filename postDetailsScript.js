@@ -92,22 +92,21 @@ function getPost() {
                 </div>
             </div>
 
-            <div id="add-comment-container" class="card-footer bg-transparent border-0 p-4"
+            <div id="add-comment-container" class="card-footer bg-transparent border-0 p-3 p-md-4"
                 style="border-top: 1px solid rgba(255,255,255,0.1) !important;">
-                <!-- اتأكدنا إن الحاوية دي واخده w-100 -->
-                <div class="d-flex align-items-center gap-3 w-100">
+                <div class="d-flex align-items-center gap-2 gap-md-3 w-100">
                     <img src="${userAvatar}" alt=""
-                        style="height:45px;width:45px;object-fit:cover;"
-                        class="rounded-circle border border-2 border-secondary shadow-sm">
+                        style="height:40px;width:40px;object-fit:cover;"
+                        class="rounded-circle border border-2 border-secondary shadow-sm d-none d-sm-block">
                     
                     <input id="comment-input" type="text" class="form-control text-light custom-comment-input flex-grow-1"
                         placeholder="Write a comment..."
-                        style="background-color: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1); border-radius: 20px; padding: 12px 20px;">
+                        style="background-color: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1); border-radius: 20px; padding: 10px 15px; min-width: 120px;">
                     
-                    <button class="btn btn-primary px-4 d-flex align-items-center gap-2 shadow-sm"
+                    <button class="btn btn-primary px-3 px-md-4 py-2 d-flex align-items-center justify-content-center gap-2 shadow-sm"
                         style="border-radius: 20px; font-weight: 500; white-space: nowrap;"
                         onclick="commentBtnClicked()">
-                        <i class="bi bi-send-fill"></i> Comment
+                        <i class="bi bi-send-fill"></i> <span class="d-none d-sm-inline">Comment</span>
                     </button>
                 </div>
             </div>

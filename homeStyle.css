@@ -306,3 +306,33 @@
         }
         }
 
+        /* Mobile Responsive Fixes */
+        @media (max-width: 576px) {
+            .custom-navbar {
+                padding: 6px 10px;
+            }
+            .nav-group {
+                gap: 5px;
+            }
+            .nav-item {
+                padding: 8px 12px;
+                font-size: 16px;
+            }
+            .nav-item .nav-text {
+                display: none !important;
+            }
+            .user-profile-badge {
+                padding: 3px 6px !important;
+            }
+            .custom-username-text {
+                display: none;
+            }
+            .custom-add-btn {
+                bottom: max(20px, env(safe-area-inset-bottom));
+                right: 15px;
+                padding: 10px 20px;
+                font-size: 16px;
+                z-index: 1050;
+            }
+        }
+
