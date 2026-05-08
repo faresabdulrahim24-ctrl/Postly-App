@@ -54,21 +54,33 @@ window.SupabaseAPI = {
         return _ok({ token, user });
     },
 
-    async login(username, password) {
-        // fetch email from profiles first
-        const { data: profile } = await _db.from('profiles').select('*').eq('username', username).maybeSingle();
-        if (!profile) return _err('Invalid credentials.', 401);
+    async login(usernameOrEmail, password) {
+        let emailToTry = usernameOrEmail;
+        let username = usernameOrEmail;
 
-        // We stored email in auth — try signing in with stored email pattern
+        if (!usernameOrEmail.includes('@')) {
+            // It's a username, try to construct the default email pattern
+            emailToTry = `${usernameOrEmail}@faresbook.app`;
+        }
+
         const { data, error } = await _db.auth.signInWithPassword({
-            email: profile.email || `${username}@faresbook.app`,
+            email: emailToTry,
             password,
         });
 
-        if (error) return _err('Invalid credentials.', 401);
+        if (error) {
+            // If they registered with a real email but tried to login with username, we can't find their email.
+            // Return generic error.
+            return _err('Invalid credentials. If you registered with a real email, please use your email to login.', 401);
+        }
+
+        const actualUsername = data.user.user_metadata?.username || username;
+
+        // Fetch profile
+        const { data: profile } = await _db.from('profiles').select('*').eq('username', actualUsername).maybeSingle();
 
         const token = data.session.access_token;
-        return _ok({ token, user: profile });
+        return _ok({ token, user: profile || data.user.user_metadata });
     },
 
     async logout() {
@@ -104,6 +116,15 @@ window.SupabaseAPI = {
         return _ok({ data: posts, meta: { current_page: page, last_page: Math.ceil(count/limit), total: count } });
     },
 
+    async getUserCommentsCount(userId) {
+        const { count, error } = await _db
+            .from('comments')
+            .select('*', { count: 'exact', head: true })
+            .eq('author_id', userId);
+        if (error) return _err(error.message);
+        return _ok({ count });
+    },
+
     // ── POSTS ──────────────────────────────────────────────────────────────
 
     async getPosts(limit=5, page=1) {
@@ -130,7 +151,7 @@ window.SupabaseAPI = {
     async createPost(title, body, imageFile, token) {
         const { data: { user }, error: authError } = await _db.auth.getUser(token);
         if (authError || !user) return _err('Unauthenticated.', 401);
-        if (!body) return _err('The body field is required.');
+
 
         let imgUrl = null;
         if (imageFile instanceof File) {
@@ -145,7 +166,7 @@ window.SupabaseAPI = {
 
         const { data: post, error } = await _db
             .from('posts')
-            .insert({ title: title || null, body, image: imgUrl, author_id: user.id })
+            .insert({ title: title || null, body: body || "", image: imgUrl, author_id: user.id })
             .select()
             .single();
 
@@ -158,7 +179,7 @@ window.SupabaseAPI = {
         const { data: { user }, error: authError } = await _db.auth.getUser(token);
         if (authError || !user) return _err('Unauthenticated.', 401);
 
-        const updates = { title: title || null, body };
+        const updates = { title: title || null, body: body || "" };
         if (imageFile instanceof File) {
             const ext      = imageFile.name.split('.').pop();
             const fileName = `posts/${user.id}_${Date.now()}.${ext}`;

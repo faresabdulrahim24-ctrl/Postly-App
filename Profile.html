@@ -11,11 +11,10 @@
     <link rel="stylesheet" href="./HomeStyle.css">
     <link rel="icon" type="image/png" href="./favicon.png">
 
-    <title>Home Page</title>
+    <title>Profile Page</title>
 </head>
 
 <body>
-
     <div id="loader-overlay">
         <div class="lds-ellipsis" style="color: #0d6efd;"><div></div><div></div><div></div><div></div></div>
     </div>
@@ -72,9 +71,9 @@
                             <input type="text" class="form-control" id="register-username-input">
                         </div>
                         <!-- <div class="mb-3">
-                            <label for="email" class="col-form-label">Email:</label>
-                            <input type="email" class="form-control" id="register-email-input">
-                        </div> -->
+            <label for="email" class="col-form-label">Email:</label>
+            <input type="email" class="form-control" id="register-email-input">
+          </div> -->
                         <div class="mb-3">
                             <label for="password" class="col-form-label">Password:</label>
                             <input type="password" class="form-control" id="register-password-input">
@@ -175,12 +174,12 @@
                         <span class="nav-text text-permanent ms-2">Postly</span>
                     </a>
 
-                    <a href="Home.html" class="nav-item active">
+                    <a href="Home.html" class="nav-item">
                         <i class="bi bi-house-door-fill"></i>
                         <span class="nav-text">Home</span>
                     </a>
 
-                    <a href="Profile.html" class="nav-item" id="profile-btn">
+                    <a href="Profile.html" class="nav-item active" id="profile-btn">
                         <i class="bi bi-person-fill"></i>
                         <span class="nav-text">Profile</span>
                     </a>
@@ -222,58 +221,39 @@
 
     <!--main content-->
     <div class="container">
-        <!-- Posts will be displayed here -->
-        <div class="d-flex justify-content-center mt-5">
+        <!-- Profile Header -->
+        <div class="d-flex justify-content-center mt-5 mb-4">
             <div class="col-12 col-md-8 col-lg-6">
+                <div class="card custom-card shadow-lg border-0" id="profile-header" style="background:linear-gradient(145deg,rgba(11,19,43,0.7),rgba(34,40,49,0.9)); display:none;">
+                    <div class="card-body text-center p-5">
+                        <img id="profile-image" src="" alt="Profile Image" 
+                             class="rounded-circle border border-4 border-primary shadow mb-3" 
+                             style="width: 120px; height: 120px; object-fit: cover;">
+                        <h2 id="profile-name" class="text-white fw-bold mb-1"></h2>
+                        <h5 id="profile-username" class="text-secondary mb-4"></h5>
+                        
+                        <div class="d-flex justify-content-center gap-4">
+                            <div class="text-center">
+                                <h3 id="profile-posts-count" class="text-white fw-bold mb-0">0</h3>
+                                <span class="text-secondary" style="font-size: 14px;">Posts</span>
+                            </div>
+                            <div class="text-center">
+                                <h3 id="profile-comments-count" class="text-white fw-bold mb-0">0</h3>
+                                <span class="text-secondary" style="font-size: 14px;">Comments</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- //Profile Header -->
+
+        <!-- Posts will be displayed here -->
+        <div class="d-flex justify-content-center mt-2">
+            <div class="col-12 col-md-8 col-lg-6">
+                <h4 class="text-white mb-4" id="user-posts-title" style="display:none;"><i class="bi bi-grid-3x3 me-2"></i>Posts</h4>
                 <div id="posts">
                     <!-- Post items will be dynamically added here -->
-                    <!-- <div class="card custom-card shadow-lg mb-5">
-
-                        <div class="card-header">
-                            <img src="./profile-pics/1.png" alt="" style="height: 45px; width: 45px; object-fit: cover;"
-                                class="rounded-circle border border-2 border-secondary">
-                            <div>
-                                <b style="font-size: 16px;">User Name</b>
-                                <div style="font-size: 12px; color: #adb5bd;">2 minutes ago</div>
-                            </div>
-                            <button class="btn btn-outline-secondary" onclick="editPostBtnClicked()"
-                                style="border-radius: 50%; padding: 8px; margin-left: auto;">
-                                <i class="bi bi-pencil"></i>
-                            </button>
-                        </div>
-
-                        <div class="card-body" onclick="postClicked()" style="cursor: pointer;">
-                            <h5 class="mb-3 text-white">Post Header</h5>
-                            <p style="color: #cbd5e1; line-height: 1.6;">
-                                the first post in the history of facecook, this is just a placeholder text to show how
-                                the post will look like, and to test the design of the post card...
-                            </p>
-
-                            <img class="w-100 post-image" src="./placeholders/3.jpg" alt="Post Image">
-
-                            <div class="mt-3 mb-2">
-                                <button id="post-tags" class="badge rounded-pill me-1 text-light"
-                                    style="background-color: rgba(255, 255, 255, 0.1); border: 1px solid rgba(255, 255, 255, 0.2); font-weight: normal; padding: 7px 10px;">
-                                    #Tag1
-                                </button>
-                            </div>
-                            <hr>
-                            <hr>
-
-                            <div class="d-flex mt-3">
-                                <button
-                                    class="btn text-light d-flex align-items-center justify-content-center gap-2 w-100 py-2"
-                                    style="background-color: rgba(255, 255, 255, 0.05); border-radius: 12px; transition: 0.3s;">
-                                    <i class="bi bi-chat-right-text"></i>
-                                    <span>
-                                        3 Comments
-                                    </span>
-                                </button>
-                            </div>
-                        </div>
-                    </div> -->
-                    <!-- post end -->
-
                 </div>
                 <!-- main content end -->
 
@@ -304,7 +284,7 @@
                 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
                 <script src="./supabase.js"></script>
                 <script src="./mainLogic.js"></script>
-                <script src="./homeScript.js"></script>
+                <script src="./profileScript.js"></script>
 </body>
 
 </html>

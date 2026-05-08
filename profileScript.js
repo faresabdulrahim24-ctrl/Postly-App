@@ -1,4 +1,36 @@
-getPosts();
+const urlParams = new URLSearchParams(window.location.search);
+let targetUserId = urlParams.get('userid');
+
+if (!targetUserId) {
+    const userStr = localStorage.getItem('username');
+    if (userStr) {
+        targetUserId = JSON.parse(userStr).id;
+    } else {
+        window.location.href = 'Home.html';
+    }
+}
+
+if (targetUserId) {
+    getUserInfo();
+    getPosts();
+}
+
+function getUserInfo() {
+    SupabaseAPI.showUser(targetUserId).then(res => {
+        const user = res.data.data;
+        document.getElementById('profile-image').src = user.profile_image || 'https://i.pravatar.cc/150?img=1';
+        document.getElementById('profile-name').innerText = user.name;
+        document.getElementById('profile-username').innerText = '@' + user.username;
+        document.getElementById('profile-header').style.display = 'block';
+        document.getElementById('user-posts-title').style.display = 'block';
+    }).catch(err => {
+        console.error('Error fetching user info:', err);
+    });
+
+    SupabaseAPI.getUserCommentsCount(targetUserId).then(res => {
+        document.getElementById('profile-comments-count').innerText = res.data.count;
+    }).catch(err => console.error(err));
+}
 
 let currentPage   = 1;
 let lastPageReached = 1;
@@ -11,10 +43,12 @@ window.addEventListener('scroll', function () {
 });
 
 function getPosts(reload = true, page = 1) {
-    SupabaseAPI.getPosts(5, page)
+    if (!targetUserId) return;
+    SupabaseAPI.getUserPosts(targetUserId, 5, page)
     .then((response) => {
         const posts = response.data.data;
         lastPageReached = response.data.meta.last_page;
+        document.getElementById('profile-posts-count').innerText = response.data.meta.total;
 
         if (reload) document.getElementById('posts').innerHTML = "";
 

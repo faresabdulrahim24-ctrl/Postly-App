@@ -18,15 +18,15 @@ function getPost() {
         const comments = post.comments || [];
         const postTitle = post.title || "";
 
-        document.getElementById('username-span').textContent = `${author.username}'s`;
+        document.getElementById('username-span').textContent = `${author.name}'s`;
 
         const commentsHTML = comments.map(comment => `
         <div class="d-flex align-items-start gap-3 mb-4">
             <img src="${comment.author.profile_image}" alt=""
-                style="height:45px;width:45px;object-fit:cover;flex-shrink:0;"
-                class="rounded-circle border border-2 border-secondary shadow-sm">
+                style="height:45px;width:45px;object-fit:cover;flex-shrink:0;cursor:pointer;"
+                class="rounded-circle border border-2 border-secondary shadow-sm" onclick="userClicked('${comment.author.id}')">
             <div style="background-color: rgba(255,255,255,0.06); border-radius: 0 15px 15px 15px; padding: 12px 16px; flex-grow:1; border: 1px solid rgba(255,255,255,0.05);">
-                <b class="text-white" style="font-size:14px;">@${comment.author.username}</b>
+                <b class="text-white" style="font-size:14px;cursor:pointer;" onclick="userClicked('${comment.author.id}')">${comment.author.name}</b>
                 <p style="font-size:14px;color:#e2e8f0;margin-bottom:0;margin-top:6px;line-height:1.6;">
                     ${comment.body}
                 </p>
@@ -49,13 +49,13 @@ function getPost() {
             style="background:linear-gradient(145deg,rgba(11,19,43,0.7),rgba(34,40,49,0.9));">
 
             <div class="card-header border-0 pb-0 pt-4 px-4 bg-transparent">
-                <div class="d-flex align-items-center gap-3">
+                <div class="d-flex align-items-center gap-3" style="cursor:pointer;" onclick="userClicked('${author.id}')">
                     <img src="${author.profile_image}" alt=""
                         style="height:55px;width:55px;object-fit:cover;"
                         class="rounded-circle border border-2 border-primary shadow-sm">
                     <div>
                         <b class="text-white d-flex align-items-center gap-1" style="font-size:18px;">
-                            ${author.username}
+                            ${author.name}
                             <i class="bi bi-patch-check-fill text-primary" style="font-size:15px;"></i>
                         </b>
                         <div style="font-size:13px;color:#adb5bd;">
@@ -67,7 +67,7 @@ function getPost() {
 
             <div class="card-body px-4">
                 <h4 class="mb-3 text-white fw-bold">${postTitle}</h4>
-                <p style="color:#e2e8f0;line-height:1.8;font-size:17px;">${post.body}</p>
+                <p style="color:#e2e8f0;line-height:1.8;font-size:17px;">${post.body || ""}</p>
 
                 <div class="mb-3">${tagsHTML}</div>
 
@@ -114,9 +114,11 @@ function getPost() {
         </div>`;
 
         setupUI();
+        hideLoader();
 
     }).catch((error) => {
         console.error('Error fetching post:', error);
+        hideLoader();
     });
 }
 
@@ -124,6 +126,7 @@ function commentBtnClicked() {
     const commentBody = document.getElementById('comment-input').value;
     const token       = localStorage.getItem('token');
 
+    showLoader();
     SupabaseAPI.createComment(postId, commentBody, token)
     .then(() => {
         document.getElementById('comment-input').value = "";
@@ -131,5 +134,6 @@ function commentBtnClicked() {
         showAlert('Comment added successfully!', 'success');
     }).catch((error) => {
         showAlert(error.response.data.message, 'danger');
+        hideLoader();
     });
 }

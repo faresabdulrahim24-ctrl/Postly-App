@@ -3,7 +3,9 @@ setupUI();
 const navItems = document.querySelectorAll('.nav-item:not(.brand-item)');
 navItems.forEach(item => {
     item.addEventListener('click', function(e) {
-        e.preventDefault();
+        if (this.getAttribute('href') === '#' || this.hasAttribute('data-bs-toggle')) {
+            e.preventDefault();
+        }
         navItems.forEach(nav => nav.classList.remove('active'));
         this.classList.add('active');
     });
@@ -13,6 +15,7 @@ function loginBtnClicked() {
     let userName = document.getElementById("username").value;
     let password = document.getElementById("password").value;
 
+    showLoader();
     SupabaseAPI.login(userName, password)
     .then((response) => {
         localStorage.setItem('token', response.data.token);
@@ -20,18 +23,21 @@ function loginBtnClicked() {
         bootstrap.Modal.getInstance(document.getElementById('login-modal')).hide();
         showAlert('Logged in successfully!', 'success');
         setupUI();
+        reloadPosts();
     }).catch((error) => {
         showAlert(error.response.data.message, 'danger');
+        hideLoader();
     });
 }
 
 function registerBtnClicked() {
     const name         = document.getElementById('register-name-input').value;
     const userName     = document.getElementById('register-username-input').value;
-    const email        = document.getElementById('register-email-input').value;
+    const email        = `${userName}@faresbook.app`;
     const password     = document.getElementById('register-password-input').value;
     const profileImage = document.getElementById('register-image-input').files[0];
 
+    showLoader();
     SupabaseAPI.register(name, userName, email, password, profileImage)
     .then((response) => {
         localStorage.setItem('token', response.data.token);
@@ -39,17 +45,21 @@ function registerBtnClicked() {
         bootstrap.Modal.getInstance(document.getElementById('register-modal')).hide();
         showAlert('Registered successfully!', 'success');
         setupUI();
+        reloadPosts();
     }).catch((error) => {
         showAlert(error.response.data.message, 'danger');
+        hideLoader();
     });
 }
 
 function logoutBtnClicked() {
+    showLoader();
     SupabaseAPI.logout().finally(() => {
         localStorage.removeItem('token');
         localStorage.removeItem('username');
         showAlert('Logged out successfully!', 'success');
         setupUI();
+        reloadPosts();
     });
 }
 
@@ -98,11 +108,21 @@ function setupUI() {
         if (userStr) {
             const user = JSON.parse(userStr);
             const usernameEl = document.getElementById('logged-in-username');
-            if (usernameEl) usernameEl.innerText = `@${user.username}`;
+            if (usernameEl) usernameEl.innerText = `${user.name}`;
             const userImgEl = document.getElementById('nav-user-image');
             if (userImgEl && user.profile_image) userImgEl.src = user.profile_image;
         }
     }
+}
+
+function reloadPosts() {
+    if (typeof getPosts === 'function') getPosts(true);
+    if (typeof getPost === 'function') getPost();
+}
+
+function userClicked(userId) {
+    if (!userId) return;
+    window.location.href = `Profile.html?userid=${userId}`;
 }
 
 let lastScrollTop = 0;
@@ -125,4 +145,20 @@ function getCurrentUser() {
 function openImage(imageUrl) {
     document.getElementById('modal-displayed-image').src = imageUrl;
     new bootstrap.Modal(document.getElementById('image-viewer-modal')).show();
+}
+
+function showLoader() {
+    const loader = document.getElementById('loader-overlay');
+    if (loader) {
+        loader.style.display = 'flex';
+        loader.style.opacity = '1';
+    }
+}
+
+function hideLoader() {
+    const loader = document.getElementById('loader-overlay');
+    if (loader) {
+        loader.style.opacity = '0';
+        setTimeout(() => loader.style.display = 'none', 400);
+    }
 }
