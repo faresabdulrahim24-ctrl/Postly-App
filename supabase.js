@@ -238,12 +238,13 @@ window.SupabaseAPI = {
         const { data: comment, error } = await _db
             .from('comments')
             .update({ body })
-            .eq('id', id)
+            .eq('id', Number(id))
             .eq('author_id', user.id)
             .select('*, author:profiles(*)')
-            .single();
+            .maybeSingle();
 
         if (error) return _err(error.message);
+        if (!comment) return _err('Permission Denied: Please enable UPDATE policy for comments in Supabase.', 403);
         return _ok({ data: comment });
     },
 
@@ -251,13 +252,15 @@ window.SupabaseAPI = {
         const { data: { user }, error: authError } = await _db.auth.getUser(token);
         if (authError || !user) return _err('Unauthenticated.', 401);
 
-        const { error } = await _db
+        const { data: deleted, error } = await _db
             .from('comments')
             .delete()
-            .eq('id', id)
-            .eq('author_id', user.id);
+            .eq('id', Number(id))
+            .eq('author_id', user.id)
+            .select();
 
         if (error) return _err(error.message);
+        if (!deleted || deleted.length === 0) return _err('Permission Denied: Please enable DELETE policy for comments in Supabase.', 403);
         return _ok({ message: 'Comment deleted successfully.' });
     },
 
