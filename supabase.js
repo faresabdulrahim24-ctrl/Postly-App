@@ -230,6 +230,37 @@ window.SupabaseAPI = {
         return _ok({ data: comment });
     },
 
+    async updateComment(id, body, token) {
+        const { data: { user }, error: authError } = await _db.auth.getUser(token);
+        if (authError || !user) return _err('Unauthenticated.', 401);
+        if (!body) return _err('The body field is required.');
+
+        const { data: comment, error } = await _db
+            .from('comments')
+            .update({ body })
+            .eq('id', id)
+            .eq('author_id', user.id)
+            .select('*, author:profiles(*)')
+            .single();
+
+        if (error) return _err(error.message);
+        return _ok({ data: comment });
+    },
+
+    async deleteComment(id, token) {
+        const { data: { user }, error: authError } = await _db.auth.getUser(token);
+        if (authError || !user) return _err('Unauthenticated.', 401);
+
+        const { error } = await _db
+            .from('comments')
+            .delete()
+            .eq('id', id)
+            .eq('author_id', user.id);
+
+        if (error) return _err(error.message);
+        return _ok({ message: 'Comment deleted successfully.' });
+    },
+
     // ── TAGS ───────────────────────────────────────────────────────────────
 
     async getTags() {

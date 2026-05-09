@@ -22,14 +22,32 @@ function getPost() {
 
         const commentsHTML = comments.map(comment => {
             const commentAvatar = (comment.author.profile_image || "").replace(/"/g, "'");
+            
+            let actionButtons = "";
+            if (currentUser && currentUser.id === comment.author.id) {
+                actionButtons = `
+                <div class="d-flex gap-2 ms-auto">
+                    <button class="btn btn-sm text-secondary p-0 m-0" style="border:none;background:transparent;" onclick="editCommentBtnClicked('${encodeURIComponent(JSON.stringify(comment)).replace(/'/g, "%27")}')">
+                        <i class="bi bi-pencil" style="font-size:16px;"></i>
+                    </button>
+                    <button class="btn btn-sm text-danger p-0 m-0 ms-2" style="border:none;background:transparent;" onclick="deleteCommentBtnClicked(${comment.id})">
+                        <i class="bi bi-trash" style="font-size:16px;"></i>
+                    </button>
+                </div>
+                `;
+            }
+
             return `
         <div class="d-flex align-items-start gap-3 mb-4">
             <img src="${commentAvatar}" alt="" loading="lazy"
                 style="height:45px;width:45px;object-fit:cover;flex-shrink:0;cursor:pointer;"
                 class="rounded-circle border border-2 border-secondary shadow-sm" onclick="userClicked('${comment.author.id}')">
-            <div style="background-color: rgba(255,255,255,0.06); border-radius: 0 15px 15px 15px; padding: 12px 16px; flex-grow:1; border: 1px solid rgba(255,255,255,0.05);">
-                <b class="text-white" style="font-size:14px;cursor:pointer;" onclick="userClicked('${comment.author.id}')">${comment.author.name}</b>
-                <p style="font-size:14px;color:#e2e8f0;margin-bottom:0;margin-top:6px;line-height:1.6;">
+            <div class="d-flex flex-column flex-grow-1" style="background-color: rgba(255,255,255,0.06); border-radius: 0 15px 15px 15px; padding: 12px 16px; border: 1px solid rgba(255,255,255,0.05);">
+                <div class="d-flex justify-content-between align-items-center">
+                    <b class="text-white" style="font-size:14px;cursor:pointer;" onclick="userClicked('${comment.author.id}')">${comment.author.name}</b>
+                    ${actionButtons}
+                </div>
+                <p style="font-size:14px;color:#e2e8f0;margin-bottom:0;margin-top:4px;line-height:1.6; word-break: break-word;">
                     ${comment.body}
                 </p>
             </div>
@@ -136,6 +154,56 @@ function commentBtnClicked() {
         showAlert('Comment added successfully!', 'success');
     }).catch((error) => {
         showAlert(error.response.data.message, 'danger');
+        hideLoader();
+    });
+}
+
+function editCommentBtnClicked(commentObjStr) {
+    const comment = JSON.parse(decodeURIComponent(commentObjStr));
+    document.getElementById('edit-comment-id').value = comment.id;
+    document.getElementById('edit-comment-input').value = comment.body;
+    new bootstrap.Modal(document.getElementById('edit-comment-modal')).show();
+}
+
+function confirmEditComment() {
+    const commentId = document.getElementById('edit-comment-id').value;
+    const body = document.getElementById('edit-comment-input').value;
+    const token = localStorage.getItem('token');
+
+    showLoader();
+    SupabaseAPI.updateComment(commentId, body, token)
+    .then(() => {
+        bootstrap.Modal.getInstance(document.getElementById('edit-comment-modal')).hide();
+        showAlert('Comment updated successfully!', 'success');
+        getPost();
+    }).catch(error => {
+        showAlert(error.response?.data?.message || 'Error editing comment', 'danger');
+        hideLoader();
+    });
+}
+
+function deleteCommentBtnClicked(commentId) {
+    document.getElementById('delete-comment-id').value = commentId;
+    new bootstrap.Modal(document.getElementById('delete-comment-modal')).show();
+}
+
+function confirmDeleteComment() {
+    const commentId = document.getElementById('delete-comment-id').value;
+    const token = localStorage.getItem('token');
+    
+    const modalEl = document.getElementById('delete-comment-modal');
+    const modalInstance = bootstrap.Modal.getInstance(modalEl);
+    if (modalInstance) {
+        modalInstance.hide();
+    }
+
+    showLoader();
+    SupabaseAPI.deleteComment(commentId, token)
+    .then(() => {
+        showAlert('Comment deleted successfully!', 'success');
+        getPost();
+    }).catch(error => {
+        showAlert(error.response?.data?.message || 'Error deleting comment', 'danger');
         hideLoader();
     });
 }
