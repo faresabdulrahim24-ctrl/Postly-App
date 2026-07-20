@@ -79,6 +79,37 @@ function showAlert(message, type) {
     }, 3000);
 }
 
+function likeBtnClicked(postId, event) {
+    if (event) event.stopPropagation();
+
+    const token = localStorage.getItem('token');
+    if (!token) {
+        showAlert('Please login to like posts.', 'danger');
+        return;
+    }
+
+    const btn = document.getElementById(`like-btn-${postId}`);
+    if (btn) btn.disabled = true; // avoid double-clicks while the request is in flight
+
+    SupabaseAPI.toggleLike(postId, token)
+    .then((response) => {
+        const { liked, likes_count } = response.data;
+        const icon    = btn ? btn.querySelector('i') : null;
+        const countEl = document.getElementById(`like-count-${postId}`);
+
+        if (countEl) countEl.innerText = likes_count;
+        if (btn) btn.classList.toggle('liked', liked);
+        if (icon) {
+            icon.classList.toggle('bi-heart-fill', liked);
+            icon.classList.toggle('bi-heart', !liked);
+        }
+    }).catch((error) => {
+        showAlert(error.response?.data?.message || 'Error updating like', 'danger');
+    }).finally(() => {
+        if (btn) btn.disabled = false;
+    });
+}
+
 function setupUI() {
     const token = localStorage.getItem('token');
 

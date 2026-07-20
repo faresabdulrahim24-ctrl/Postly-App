@@ -17,6 +17,7 @@ function getPost() {
         const author   = post.author;
         const comments = post.comments || [];
         const postTitle = post.title || "";
+        const userLiked = !!(currentUser && post.likes && post.likes.some(l => String(l.user_id) === String(currentUser.id)));
 
         document.getElementById('username-span').textContent = `${author.name}'s`;
 
@@ -97,10 +98,16 @@ function getPost() {
                     style="max-height:500px;object-fit:cover;cursor:pointer;"
                     onclick="openImage('${post.image}')">` : ''}
 
-                <!-- زرار عدد الكومنتات -->
-                <div class="d-flex align-items-center mt-4 pt-3 border-top border-secondary border-opacity-25">
-                    <!-- التعديل هنا: ضفنا justify-content-center عشان الأيقونة والكلمة يجوا في النص -->
-                    <button class="btn text-light d-flex align-items-center justify-content-center gap-2 w-100 py-2"
+                <!-- زرار اللايك وعدد الكومنتات -->
+                <div class="d-flex align-items-center mt-4 pt-3 border-top border-secondary border-opacity-25 gap-2">
+                    <button id="like-btn-${post.id}" class="btn text-light d-flex align-items-center justify-content-center gap-2 w-50 py-2 like-btn ${userLiked ? 'liked' : ''}"
+                        style="background-color:rgba(255,255,255,0.05);border-radius:12px;"
+                        onclick="likeBtnClicked(${post.id}, event)">
+                        <i class="bi ${userLiked ? 'bi-heart-fill' : 'bi-heart'}"></i>
+                        <span id="like-count-${post.id}">${post.likes_count || 0}</span>
+                        <span class="d-none d-sm-inline">Likes</span>
+                    </button>
+                    <button class="btn text-light d-flex align-items-center justify-content-center gap-2 w-50 py-2"
                         style="background-color:rgba(255,255,255,0.05);border-radius:12px;">
                         <i class="bi bi-chat-text"></i>
                         <span>${post.comments_count} Comments</span>

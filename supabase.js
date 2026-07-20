@@ -22,11 +22,11 @@ function _err(msg, code=422) {
 async function _getFullPost(postId) {
     const { data: post, error } = await _db
         .from('posts')
-        .select('*, author:profiles(*), comments(*, author:profiles(*)), post_tags(tag:tags(*))')
+        .select('*, author:profiles(*), comments(*, author:profiles(*)), post_tags(tag:tags(*)), likes(user_id)')
         .eq('id', postId)
         .single();
     if (error) throw error;
-    return { ...post, tags: post.post_tags.map(pt => pt.tag), comments_count: post.comments.length };
+    return { ...post, tags: post.post_tags.map(pt => pt.tag), comments_count: post.comments.length, likes_count: post.likes.length };
 }
 
 window.SupabaseAPI = {
@@ -97,6 +97,63 @@ window.SupabaseAPI = {
         return _ok({ message: 'Logged out successfully.' });
     },
 
+    async updateProfile(token, { name, username, password, profile_image } = {}) {
+        const { data: { user }, error: authError } = await _db.auth.getUser(token);
+        if (authError || !user) return _err('Unauthenticated.', 401);
+
+        if (username) {
+            const { data: existing } = await _db
+                .from('profiles')
+                .select('id')
+                .eq('username', username)
+                .neq('id', user.id)
+                .maybeSingle();
+            if (existing) return _err('The username has already been taken.');
+        }
+
+        const profileUpdates = {};
+        if (name)     profileUpdates.name     = name;
+        if (username) profileUpdates.username = username;
+
+        if (profile_image instanceof File) {
+            const ext      = profile_image.name.split('.').pop();
+            const fileName = `avatars/${user.id}_${Date.now()}.${ext}`;
+            const { error: uploadError } = await _db.storage.from('images').upload(fileName, profile_image, { upsert: true });
+            if (!uploadError) {
+                const { data: urlData } = _db.storage.from('images').getPublicUrl(fileName);
+                profileUpdates.profile_image = urlData.publicUrl;
+            }
+        }
+
+        if (Object.keys(profileUpdates).length > 0) {
+            const { error } = await _db.from('profiles').update(profileUpdates).eq('id', user.id);
+            if (error) return _err(error.message);
+        }
+
+        // Keep auth metadata and (optionally) password in sync
+        const authUpdates = {};
+        if (password) authUpdates.password = password;
+        if (Object.keys(profileUpdates).length > 0) {
+            authUpdates.data = {
+                ...user.user_metadata,
+                ...profileUpdates,
+            };
+        }
+        if (Object.keys(authUpdates).length > 0) {
+            const { error: authUpdateError } = await _db.auth.updateUser(authUpdates);
+            if (authUpdateError) return _err(authUpdateError.message);
+        }
+
+        const { data: updatedProfile, error: fetchError } = await _db
+            .from('profiles')
+            .select('*')
+            .eq('id', user.id)
+            .single();
+        if (fetchError) return _err(fetchError.message);
+
+        return _ok({ user: updatedProfile });
+    },
+
     // ── USERS ──────────────────────────────────────────────────────────────
 
     async getUsers(limit=10, page=1) {
@@ -116,12 +173,12 @@ window.SupabaseAPI = {
         const from = (page-1)*limit, to = from+limit-1;
         const { data, error, count } = await _db
             .from('posts')
-            .select('*, author:profiles(*), comments(id), post_tags(tag:tags(*))', { count:'exact' })
+            .select('*, author:profiles(*), comments(id), post_tags(tag:tags(*)), likes(user_id)', { count:'exact' })
             .eq('author_id', userId)
             .order('created_at', { ascending: false })
             .range(from, to);
         if (error) return _err(error.message);
-        const posts = data.map(p => ({ ...p, tags: p.post_tags.map(pt=>pt.tag), comments_count: p.comments.length }));
+        const posts = data.map(p => ({ ...p, tags: p.post_tags.map(pt=>pt.tag), comments_count: p.comments.length, likes_count: p.likes.length }));
         return _ok({ data: posts, meta: { current_page: page, last_page: Math.ceil(count/limit), total: count } });
     },
 
@@ -140,11 +197,11 @@ window.SupabaseAPI = {
         const from = (page-1)*limit, to = from+limit-1;
         const { data, error, count } = await _db
             .from('posts')
-            .select('*, author:profiles(*), comments(id), post_tags(tag:tags(*))', { count:'exact' })
+            .select('*, author:profiles(*), comments(id), post_tags(tag:tags(*)), likes(user_id)', { count:'exact' })
             .order('created_at', { ascending: false })
             .range(from, to);
         if (error) return _err(error.message);
-        const posts = data.map(p => ({ ...p, tags: p.post_tags.map(pt=>pt.tag), comments_count: p.comments.length }));
+        const posts = data.map(p => ({ ...p, tags: p.post_tags.map(pt=>pt.tag), comments_count: p.comments.length, likes_count: p.likes.length }));
         return _ok({ data: posts, meta: { current_page: page, last_page: Math.ceil(count/limit), total: count } });
     },
 
@@ -262,6 +319,40 @@ window.SupabaseAPI = {
         if (error) return _err(error.message);
         if (!deleted || deleted.length === 0) return _err('Permission Denied: Please enable DELETE policy for comments in Supabase.', 403);
         return _ok({ message: 'Comment deleted successfully.' });
+    },
+
+    // ── LIKES ────────────────────────────────────────────────────────────
+
+    async toggleLike(postId, token) {
+        const { data: { user }, error: authError } = await _db.auth.getUser(token);
+        if (authError || !user) return _err('Unauthenticated.', 401);
+
+        const { data: existing, error: checkError } = await _db
+            .from('likes')
+            .select('id')
+            .eq('post_id', Number(postId))
+            .eq('user_id', user.id)
+            .maybeSingle();
+        if (checkError) return _err(checkError.message);
+
+        let liked;
+        if (existing) {
+            const { error } = await _db.from('likes').delete().eq('id', existing.id);
+            if (error) return _err(error.message);
+            liked = false;
+        } else {
+            const { error } = await _db.from('likes').insert({ post_id: Number(postId), user_id: user.id });
+            if (error) return _err(error.message);
+            liked = true;
+        }
+
+        const { count, error: countError } = await _db
+            .from('likes')
+            .select('*', { count: 'exact', head: true })
+            .eq('post_id', Number(postId));
+        if (countError) return _err(countError.message);
+
+        return _ok({ liked, likes_count: count });
     },
 
     // ── TAGS ───────────────────────────────────────────────────────────────

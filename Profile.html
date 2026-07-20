@@ -156,6 +156,47 @@
     </div>
     <!-- //delete post modal -->
 
+    <!-- edit profile modal -->
+    <div class="modal fade" id="edit-profile-modal" tabindex="-1" aria-labelledby="editProfileModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content custom-modal">
+                <div class="modal-header">
+                    <h1 class="modal-title fs-5" id="editProfileModalLabel">Edit Profile</h1>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"
+                        aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form>
+                        <div class="mb-3">
+                            <label for="edit-profile-name-input" class="col-form-label">Name:</label>
+                            <input type="text" class="form-control" id="edit-profile-name-input">
+                        </div>
+                        <div class="mb-3">
+                            <label for="edit-profile-username-input" class="col-form-label">Username:</label>
+                            <input type="text" class="form-control" id="edit-profile-username-input">
+                        </div>
+                        <div class="mb-3">
+                            <label for="edit-profile-password-input" class="col-form-label">New Password:</label>
+                            <input type="password" class="form-control" id="edit-profile-password-input"
+                                placeholder="Leave blank to keep current password">
+                        </div>
+                        <div class="mb-3">
+                            <label for="edit-profile-image-input" class="col-form-label">Profile Image:</label>
+                            <input type="file" class="form-control" id="edit-profile-image-input" accept="image/*">
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline-secondary text-light"
+                        data-bs-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-outline-success"
+                        onclick="confirmEditProfile()">Save Changes</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- //edit profile modal -->
+
     <!-- //modals -->
 
     <!-- alerts -->
@@ -242,6 +283,10 @@
                                 <span class="text-secondary" style="font-size: 14px;">Comments</span>
                             </div>
                         </div>
+
+                        <button id="edit-profile-btn" class="btn btn-outline-light mt-4" style="display:none;border-radius:12px;" data-bs-toggle="modal" data-bs-target="#edit-profile-modal">
+                            <i class="bi bi-pencil-square me-1"></i> Edit Profile
+                        </button>
                     </div>
                 </div>
             </div>

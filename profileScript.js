@@ -15,14 +15,23 @@ if (targetUserId) {
     getPosts();
 }
 
+let loadedProfileUser = null;
+
 function getUserInfo() {
     SupabaseAPI.showUser(targetUserId).then(res => {
         const user = res.data.data;
+        loadedProfileUser = user;
         document.getElementById('profile-image').src = (user.profile_image || 'https://i.pravatar.cc/150?img=1').replace(/"/g, "'");
         document.getElementById('profile-name').innerText = user.name;
         document.getElementById('profile-username').innerText = '@' + user.username;
         document.getElementById('profile-header').style.display = 'block';
         document.getElementById('user-posts-title').style.display = 'block';
+
+        const currentUser = getCurrentUser();
+        const editBtn = document.getElementById('edit-profile-btn');
+        if (editBtn) {
+            editBtn.style.display = (currentUser && String(currentUser.id) === String(user.id)) ? 'inline-block' : 'none';
+        }
     }).catch(err => {
         console.error('Error fetching user info:', err);
     });
@@ -52,10 +61,13 @@ function getPosts(reload = true, page = 1) {
 
         if (reload) document.getElementById('posts').innerHTML = "";
 
+        const currentUser = getCurrentUser();
+
         for (let post of posts) {
             const author    = post.author;
             const postTitle = post.title || "";
             const safeProfileImage = (author.profile_image || "").replace(/"/g, "'");
+            const userLiked = !!(currentUser && post.likes && post.likes.some(l => String(l.user_id) === String(currentUser.id)));
 
             let actionButtons = "";
             const userStr = localStorage.getItem('username');
@@ -100,8 +112,14 @@ function getPosts(reload = true, page = 1) {
                         style="cursor:pointer;" onclick="event.stopPropagation();openImage('${post.image}')">` : ''}
                     <div class="mt-3 mb-2" id="post-tags-${post.id}"></div>
                     <hr><hr>
-                    <div class="d-flex mt-3">
-                        <button class="btn text-light d-flex align-items-center justify-content-center gap-2 w-100 py-2"
+                    <div class="d-flex mt-3 gap-2">
+                        <button id="like-btn-${post.id}" class="btn text-light d-flex align-items-center justify-content-center gap-2 w-50 py-2 like-btn ${userLiked ? 'liked' : ''}"
+                            style="background-color:rgba(255,255,255,0.05);border-radius:12px;"
+                            onclick="likeBtnClicked(${post.id}, event)">
+                            <i class="bi ${userLiked ? 'bi-heart-fill' : 'bi-heart'}"></i>
+                            <span id="like-count-${post.id}">${post.likes_count || 0}</span>
+                        </button>
+                        <button class="btn text-light d-flex align-items-center justify-content-center gap-2 w-50 py-2"
                             style="background-color:rgba(255,255,255,0.05);border-radius:12px;">
                             <i class="bi bi-chat-right-text"></i>
                             <span>${post.comments_count} Comments</span>
@@ -218,4 +236,49 @@ function addBtnClicked() {
 function postClicked(postId) {
     if (!postId) return;
     window.location.href = `postDetails.html?postId=${postId}`;
+}
+
+document.getElementById('edit-profile-btn')?.addEventListener('click', () => {
+    if (!loadedProfileUser) return;
+    document.getElementById('edit-profile-name-input').value     = loadedProfileUser.name || "";
+    document.getElementById('edit-profile-username-input').value = loadedProfileUser.username || "";
+    document.getElementById('edit-profile-password-input').value = "";
+    document.getElementById('edit-profile-image-input').value    = "";
+});
+
+function confirmEditProfile() {
+    const name     = document.getElementById('edit-profile-name-input').value;
+    const username = document.getElementById('edit-profile-username-input').value;
+    const password = document.getElementById('edit-profile-password-input').value;
+    const image    = document.getElementById('edit-profile-image-input').files[0];
+    const token    = localStorage.getItem('token');
+
+    if (!name || !username) {
+        showAlert('Name and username are required.', 'danger');
+        return;
+    }
+
+    showLoader();
+    try {
+        SupabaseAPI.updateProfile(token, { name, username, password: password || undefined, profile_image: image })
+        .then((response) => {
+            const updatedUser = response.data.user;
+
+            // Keep the logged-in session data (and navbar) in sync since you're editing your own profile
+            localStorage.setItem('username', JSON.stringify(updatedUser));
+
+            bootstrap.Modal.getInstance(document.getElementById('edit-profile-modal')).hide();
+            showAlert('Profile updated successfully!', 'success');
+            setupUI();
+            getUserInfo();
+            hideLoader();
+        }).catch((error) => {
+            showAlert(error.response?.data?.message || 'Error updating profile', 'danger');
+            hideLoader();
+        });
+    } catch (error) {
+        console.error('Unexpected error updating profile:', error);
+        showAlert('Something went wrong while updating your profile.', 'danger');
+        hideLoader();
+    }
 }

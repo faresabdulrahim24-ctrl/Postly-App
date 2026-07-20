@@ -71,11 +71,18 @@ const MockAPI = (() => {
       { id: 15, name: 'opensource' },
     ],
 
+    likes: [
+      { id: 1, post_id: 1, user_id: 2 },
+      { id: 2, post_id: 1, user_id: 3 },
+      { id: 3, post_id: 2, user_id: 1 },
+    ],
+
     tokens: {},
     nextPostId:    9,
     nextCommentId: 13,
     nextUserId:    6,
     nextTagId:     16,
+    nextLikeId:    4,
   };
 
   // ── Restore token across page navigation ──────────────────
@@ -115,6 +122,8 @@ const MockAPI = (() => {
       .filter(c => c.post_id === p.id)
       .map(c => ({ ...c, author: publicUser(getUser(c.author_id)) })),
     comments_count: db.comments.filter(c => c.post_id === p.id).length,
+    likes: db.likes.filter(l => l.post_id === p.id).map(l => ({ user_id: l.user_id })),
+    likes_count: db.likes.filter(l => l.post_id === p.id).length,
   });
 
   const paginate = (array, limit, page) => {
@@ -293,6 +302,30 @@ const MockAPI = (() => {
     return ok({ data: { ...comment, author: publicUser(user) } });
   }
 
+  // ── LIKES ──────────────────────────────────────────────────
+
+  function toggleLike(postId, token) {
+    const user = getUserFromToken(token);
+    if (!user) return err('Unauthenticated.', 401);
+
+    postId = parseInt(postId);
+    const post = db.posts.find(p => p.id === postId);
+    if (!post) return err('Post not found.', 404);
+
+    const idx = db.likes.findIndex(l => l.post_id === postId && l.user_id === user.id);
+    let liked;
+    if (idx > -1) {
+      db.likes.splice(idx, 1);
+      liked = false;
+    } else {
+      db.likes.push({ id: db.nextLikeId++, post_id: postId, user_id: user.id });
+      liked = true;
+    }
+
+    const likes_count = db.likes.filter(l => l.post_id === postId).length;
+    return ok({ liked, likes_count });
+  }
+
   // ── TAGS ───────────────────────────────────────────────────
 
   function getTags() {
@@ -327,6 +360,7 @@ const MockAPI = (() => {
     updatePost,
     deletePost,
     createComment,
+    toggleLike,
     getTags,
     getTagPosts,
   };

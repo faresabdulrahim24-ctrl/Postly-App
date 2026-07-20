@@ -18,10 +18,13 @@ function getPosts(reload = true, page = 1) {
 
         if (reload) document.getElementById('posts').innerHTML = "";
 
+        const currentUser = getCurrentUser();
+
         for (let post of posts) {
             const author    = post.author;
             const postTitle = post.title || "";
             const safeProfileImage = (author.profile_image || "").replace(/"/g, "'");
+            const userLiked = !!(currentUser && post.likes && post.likes.some(l => String(l.user_id) === String(currentUser.id)));
 
             let actionButtons = "";
             const userStr = localStorage.getItem('username');
@@ -66,8 +69,14 @@ function getPosts(reload = true, page = 1) {
                         style="cursor:pointer;" onclick="event.stopPropagation();openImage('${post.image}')">` : ''}
                     <div class="mt-3 mb-2" id="post-tags-${post.id}"></div>
                     <hr><hr>
-                    <div class="d-flex mt-3">
-                        <button class="btn text-light d-flex align-items-center justify-content-center gap-2 w-100 py-2"
+                    <div class="d-flex mt-3 gap-2">
+                        <button id="like-btn-${post.id}" class="btn text-light d-flex align-items-center justify-content-center gap-2 w-50 py-2 like-btn ${userLiked ? 'liked' : ''}"
+                            style="background-color:rgba(255,255,255,0.05);border-radius:12px;"
+                            onclick="likeBtnClicked(${post.id}, event)">
+                            <i class="bi ${userLiked ? 'bi-heart-fill' : 'bi-heart'}"></i>
+                            <span id="like-count-${post.id}">${post.likes_count || 0}</span>
+                        </button>
+                        <button class="btn text-light d-flex align-items-center justify-content-center gap-2 w-50 py-2"
                             style="background-color:rgba(255,255,255,0.05);border-radius:12px;">
                             <i class="bi bi-chat-right-text"></i>
                             <span>${post.comments_count} Comments</span>
